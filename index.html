@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Data Visualization</title>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+
+  <style>
+    #bar-chart {
+      display: flex;
+      align-items: flex-end;
+    }
+    .bar {
+      border: 2px solid red;
+      background: red;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="navbar-fixed">
+      <nav class="nav-extended">
+        <div class="nav-wrapper">
+          <a href="#!" class="brand-logo center">DatVis</a>
+        </div>
+        <div class="nav-content">
+          <ul class="tabs tabs-transparent">
+            <li class="tab"><a href="#test1">2015</a></li>
+            <li class="tab"><a href="#test2">Test 2</a></li>
+            <li class="tab"><a href="#test4">Test 4</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>   
+    <div id="bar-chart">
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+  <script src="data.js"></script>
+  <script>
+  getData((dataJSON) => {
+    let stateData = []
+    dataJSON.forEach(element => {
+      let index = stateData.findIndex(data => data === element.state)
+      if (index === -1) {
+        stateData.push(element.state)
+      }
+    });
+    let getPerCitiesVoters = []
+    dataJSON.forEach(element => {
+      if( element.state === stateData[3] ) {
+        getPerCitiesVoters.push(element)
+      }
+    })
+    let getData = getPerCitiesVoters
+    getPerCitiesVoters.sort(function (a, b) {
+      return +a.totalVotes - +b.totalVotes
+    })
+    var min = +getPerCitiesVoters[0].totalVotes,
+    max = +getPerCitiesVoters[getPerCitiesVoters.length - 1].totalVotes
+    const svg = d3.select('#bar-chart').append('svg')
+                  .attr('width', 1000)
+                  .attr('height', 300)
+                  .style('background', '#eaeaea')
+    const yScale = d3.scaleLinear()
+                     .domain([min, max])
+                     .range([100, 200])
+    const colorScale = d3.scaleLinear()
+                         .domain([min, max])
+                         .range(['peru', 'teal'])
+    svg.selectAll('rect')
+        .data(getData)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .transition()
+        .duration(750)
+        .delay(function(d, i) { return i * 50; })
+        .attr('x', (d, i) => {
+          return i * 20
+        })
+        .attr('y', (d) => {
+          return 300 - yScale(+d.totalVotes)
+        })
+        .attr('width', 15)
+        .attr('height', (d) => {
+          return yScale(+d.totalVotes)
+        })
+        .attr('fill', (d) => {
+          return colorScale(+d.totalVotes)
+        })
+      // d3.select('#bar-chart').selectAll('div')
+      //   .data(getPerCitiesVoters)
+      //   .enter()
+      //   .append('div')
+      //   .attr('class', 'bar')
+      //   .style('height', function (d) {
+      //     return +d.totalVotes + 'px'
+      //   })
+    })
+    // new Vue ({
+    //   el: '#app',
+    //   data: {
+    //     states: []
+    //   },
+    //   created () {
+    //     getData((dataJSON) => {
+    //       let stateData = []
+    //       dataJSON.forEach(element => {
+    //         let index = stateData.findIndex(data => data === element.state)
+    //         if (index === -1) {
+    //           stateData.push(element.state)
+    //         }
+    //       });
+    //       this.states = stateData
+    //       let getPerCitiesVoters = []
+    //       dataJSON.forEach(element => {
+    //         if( element.state === this.states[0]) {
+    //           getPerCitiesVoters.push(element)
+    //         }
+    //       })
+    //       console.log(getPerCitiesVoters)
+    //       const svg = d3.select('#bar-chart').append('svg')
+    //                     .attr('width', 400)
+    //                     .attr('height', 300)
+    //                     .style('background', '#eaeaea')
+    //       let minValue = d3.min(+getPerCitiesVoters.totalVotes)
+    //       console.log(minValue)
+    //       const yScale = d3.scaleLinear()
+    //                        .domain([0, 1000000])
+    //                        .range([0, 100])
+    //       svg.selectAll('rect')
+    //          .data(getPerCitiesVoters)
+    //          .enter()
+    //          .append('rect')
+    //          .attr('class', 'bar')
+    //          .attr('x', (d, i) => {
+    //            return i
+    //          })
+    //          .attr('y', (d) => {
+    //            return 100 - yScale(+d.totalVotes)
+    //          })
+    //          .attr('width', 10)
+    //          .attr('height', (d) => {
+    //            return yScale(+d.totalVotes)
+    //          })
+    //       // d3.select('#bar-chart').selectAll('div')
+    //       //   .data(getPerCitiesVoters)
+    //       //   .enter()
+    //       //   .append('div')
+    //       //   .attr('class', 'bar')
+    //       //   .style('height', function (d) {
+    //       //     return +d.totalVotes + 'px'
+    //       //   })
+    //     })
+    //   }
+    // })
+  </script>
+</body>
+</html>
