@@ -13,6 +13,28 @@
       display: flex;
       align-items: flex-end;
     }
+
+     #bar-chart2 {
+      display: flex;
+      align-items: flex-end;
+      fill: antiquewhite;
+    }
+
+    .float {
+      -webkit-transition:all .3s ease-out;
+      -moz-transition:all .3s ease-out;
+      -ms-transition:all .3s ease-out;
+      -o-transition:all .3s ease-out;
+      transition:all .3s ease-out;
+    }
+
+    .float:hover {
+      -webkit-transform:translate(0px,-10px);
+      -moz-transform:translate(0px,-10px);
+      -ms-transform:translate(0px,-10px);
+      -o-transform:translate(0px,-10px);
+      transform:translate(0px,-10px);
+    }
     /* .bar {
       border: 2px solid red;
       background: red;
@@ -21,23 +43,16 @@
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="navbar-fixed">
-      <nav class="nav-extended">
-        <div class="nav-wrapper">
-          <a href="#!" class="brand-logo center">DatVis</a>
-        </div>
-        <div class="nav-content">
-          <ul class="tabs tabs-transparent">
-            <li class="tab"><a href="#test1">2015</a></li>
-            <li class="tab"><a href="#test2">Test 2</a></li>
-            <li class="tab"><a href="#test4">Test 4</a></li>
-          </ul>
-        </div>
-      </nav>
-    </div>   
-    <div id="bar-chart">
-    </div>
+  <div class="navbar-fixed">
+    <nav class="nav-extended">
+      <div class="nav-wrapper">
+        <a href="#!" class="brand-logo center">DatVis</a>
+      </div>
+    </nav>
+  </div>   
+  <div id="bar-chart">
+  </div>
+  <div id="bar-chart2">
   </div>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
@@ -65,28 +80,124 @@
     })
     var min = +stateData[0].totalVotes,
     max = +stateData[stateData.length - 1].totalVotes
-
     const svg = d3.select('#bar-chart')
                   .append('svg')
-                  .attr('width', 1000)
+                  .attr('width', 1600)
                   .attr('height', 500)
                   .style('background', '#eaeaea')
     const yScale = d3.scaleLinear()
-                     .domain([min, max])
-                     .range([100, 200])
+                     .domain([1000, 200000])
+                     .range([10, 200])
+    const xScale = d3.scaleLinear()
+                     .domain([1000, 200000])
+                     .range([10, 200])
     const colorScale = d3.scaleLinear()
                          .domain([min, max])
-                         .range(['peru', 'teal'])
+                         .range(['FireBrick', 'Orange'])
     svg.selectAll('rect')
       .data(chartData)
       .enter()
       .append('rect')
       .on('mouseover', function (d, i) {
-        d3.select(this).style('fill', '#bada55')
+        d3.select(this).style('fill', '#800000').attr('class', 'float')
       })
       .on('mouseout', function (d, i) {
         d3.select(this).style('fill', colorScale(+d.totalVotes))
       })  
+      .on('click', function (d, i) {
+        d3.selectAll('polygon').remove()
+        let totalData = []
+        totalData.push(d)
+        console.log(d)
+        svg.selectAll('polygon')
+            .data(totalData)
+            .enter()
+            .append('polygon')
+            .transition()
+            .duration(750)
+            .delay(function(d, i) { return i * 50; })
+            .attr('points', (d) => {
+            return `${1345 - (xScale(+d.registeredVoters))},${75 + yScale(+d.registeredVoters)} 
+                    ${1475 - (xScale(+d.validFirstVotes))},${150 + yScale(+d.validFirstVotes)} 
+                    ${1200 + (xScale(+d.validSecondVotes))}, ${yScale(+d.validSecondVotes)}
+                    ${1225 + (xScale(+d.invalidFirstVotes))}, ${150 + (yScale(+d.invalidFirstVotes))}
+                    ${1150 + (xScale(+d.invalidSecondVotes))}, ${200 + (yScale(+d.invalidSecondVotes))}`
+            })
+            .style('fill', 'pink')
+          let registeredData = [{
+            text: 'Registered Voters',
+            value: totalData[0].registeredVoters
+          }]
+          let firstValidData = [{
+            text: 'First Valid Votes',
+            value: totalData[0].validFirstVotes
+          }]
+          let firstInvalidData = [{
+            text: 'First Invalid Votes',
+            value: totalData[0].invalidFirstVotes
+          }]
+          let secondValidData = [{
+            text: 'Second Valid Votes',
+            value: totalData[0].validSecondVotes
+          }]
+          let secondInvalidData = [{
+            text: 'Second Invalid Votes',
+            value: totalData[0].invalidSecondVotes
+          }]
+          svg.selectAll('text data1')
+              .data(registeredData)
+              .enter()
+              .append('text')
+              .attr('transform', (d, i) => {
+                return `translate(${1130}, ${380}) rotate (220)`  
+              })
+              .text((d) => {
+                return d.text
+              })
+          svg.selectAll('text data2')
+          .data(firstValidData)
+          .enter()
+          .append('text')
+          .attr('transform', (d, i) => {
+            return `translate(${1400}, ${310} ) rotate (140)`  
+          })
+          .text((d) => {
+            return d.text
+          })
+
+          svg.selectAll('text data3')
+              .data(firstInvalidData)
+              .enter()
+              .append('text')
+              .attr('transform', (d, i) => {
+                return `translate(${1175}, ${70}) rotate (0)`  
+              })
+              .text((d) => {
+                return d.text
+              })
+
+          svg.selectAll('text data4')
+              .data(secondValidData)
+              .enter()
+              .append('text')
+              .attr('transform', (d, i) => {
+                return `translate(${1350}, ${85}) rotate (60)`  
+              })
+              .text((d) => {
+                return d.text
+              })
+
+          svg.selectAll('text data5')
+              .data(secondInvalidData)
+              .enter()
+              .append('text')
+              .attr('transform', (d, i) => {
+                return `translate(${1030}, ${195} ) rotate (300)`  
+              })
+              .text((d) => {
+                return d.text
+              })
+            })
       .transition()
       .duration(750)
       .delay(function(d, i) { return i * 50; })
@@ -126,12 +237,60 @@
       .duration(750)
       .delay(function(d, i) { return i * 50; })
       .attr('transform', (d, i) => {
-        return `translate(${30 + (i * 60)}, ${290 - yScale(+d.totalVotes)}) rotate (0)`  
+        return `translate(${30 + (i * 60)}, ${280 - yScale(+d.totalVotes)}) rotate (0)`  
       })
       .text((d) => {
         return d["totalVotes"]
       })
-    })
+    // const svg2 = d3.select('#bar-chart2')
+    //   .append('svg')
+    //   .attr('width', 10000)
+    //   .attr('height', 500)
+    //   .style('background', '#eaeaea')
+    
+    // const svg2 = d3.select('#bar-chart2')
+    //         .append('svg')
+    //         .attr('width', 1000)
+    //         .attr('height', 500)
+    //         .style('background', '#eaeaea')
+    
+    // let chart = svg2.selectAll('div')
+    //                 .data(chartData)
+    //                 .enter()
+    //                 .append('rect')
+    //                 .attr('x', (d, i) => {
+    //                   return 30 + i * 110
+    //                 })
+    //                 .attr('y', (d) => {
+    //                   return 300 - yScale(+d.totalVotes)
+    //                 })
+    //                 .attr('width', 100)
+    //                 .attr('height', (d) => {
+    //                   return yScale(+d.totalVotes)
+    //                 })
+    
+    // chartData.forEach((element) => {
+    //   let getData = []
+    //   getData.push(element.registeredVoters)
+    //   getData.push(element.validFirstVotes)
+    //   getData.push(element.validSecondVotes)
+    //   getData.push(element.totalVotes)
+    //   chart.selectAll('rect')
+    //      .data(getData)
+    //      .enter()
+    //      .append('rect')
+    //      .attr('x', (d, i) => {
+    //       return 30 + i * 5
+    //      })
+    //      .attr('y', (d) => {
+    //       return 300 - yScale(+d)
+    //      })
+    //      .attr('width', 25)
+    //      .attr('height', (d) => {
+    //       return yScale(+d)
+    //      })
+    // })
+  })
   </script>
 </body>
 </html>
